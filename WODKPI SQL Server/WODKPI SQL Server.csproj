@@ -47,11 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CleanData.cs" />
-    <Compile Include="Form_CleanData.cs">
+    <Compile Include="updateDataForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form_CleanData.Designer.cs">
-      <DependentUpon>Form_CleanData.cs</DependentUpon>
+    <Compile Include="updateDataForm.Designer.cs">
+      <DependentUpon>updateDataForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Form_WODKPI.cs">
       <SubType>Form</SubType>
@@ -61,8 +61,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form_CleanData.resx">
-      <DependentUpon>Form_CleanData.cs</DependentUpon>
+    <EmbeddedResource Include="updateDataForm.resx">
+      <DependentUpon>updateDataForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form_WODKPI.resx">
       <DependentUpon>Form_WODKPI.cs</DependentUpon>

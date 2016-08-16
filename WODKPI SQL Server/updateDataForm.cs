@@ -5,22 +5,22 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace WODKPI_SQL_Server
 {
-    public partial class Form_CleanData : Form
+    public partial class updateDataForm : Form
     {
-        System.Threading.Thread thread = null;
-        public Form_CleanData()
+        Thread thread = null;
+        public updateDataForm()
         {
             InitializeComponent();
         }
 
         private void buttonConfirmCleanData_Click(object sender, EventArgs e)
         {
-            thread = new System.Threading.Thread(new System.Threading.ThreadStart(CleanDataLoop));
+            thread = new Thread(new ThreadStart(CleanDataLoop));
             thread.IsBackground = true;
             thread.Start();
         }
@@ -56,8 +56,8 @@ namespace WODKPI_SQL_Server
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    formOutput.Text = "Cleaning " + ranker + "...";
-                    formOutput.Refresh();
+                    mainMessageLabel.Text = "Cleaning " + ranker + "...";
+                    mainMessageLabel.Refresh();
                 });
 
                 cd.InitClean(ranker, this);
@@ -70,7 +70,7 @@ namespace WODKPI_SQL_Server
 
             this.Invoke((MethodInvoker)delegate
             {
-                formOutput.Text = "Cleaning complete!";
+                mainMessageLabel.Text = "Cleaning complete!";
             });
         }
 
@@ -80,7 +80,9 @@ namespace WODKPI_SQL_Server
             {
                 thread.Interrupt();
             }
+            this.Owner.Show();
             this.Close();
+            
         }
     }
 }

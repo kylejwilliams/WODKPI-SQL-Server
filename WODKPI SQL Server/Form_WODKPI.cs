@@ -13,6 +13,7 @@ namespace WODKPI_SQL_Server
 {
     public partial class Form_WODKPI : Form
     {
+        updateDataForm udf;
         public Form_WODKPI()
         {
             InitializeComponent();
@@ -40,8 +41,10 @@ namespace WODKPI_SQL_Server
 
         private void Clean_Data_Click(object sender, EventArgs e)
         {
-            Form_CleanData fcd = new Form_CleanData();
-            fcd.Show();
+            this.Hide();
+            udf = new updateDataForm();
+            udf.Show(this);
+            udf = null;
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
