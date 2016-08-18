@@ -41,7 +41,7 @@ namespace WODKPI_SQL_Server
 
         private void Clean_Data_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             udf = new updateDataForm();
             udf.Show(this);
             udf = null;
@@ -49,7 +49,7 @@ namespace WODKPI_SQL_Server
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

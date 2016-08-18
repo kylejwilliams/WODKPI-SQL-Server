@@ -243,3 +243,6 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/WODKPI SQL Server/DBs
+/WODKPI SQL Server/SQL Queries
+/WODKPI SQL Server/RefusalsTest.accdb

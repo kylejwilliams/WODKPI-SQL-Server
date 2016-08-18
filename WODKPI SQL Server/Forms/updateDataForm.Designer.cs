@@ -29,12 +29,11 @@
         private void InitializeComponent()
         {
             this.abortUpdateButton = new System.Windows.Forms.Button();
-            this.AppendDataButton = new System.Windows.Forms.Button();
-            this.progressOverall = new System.Windows.Forms.ProgressBar();
+            this.cleanDataButton = new System.Windows.Forms.Button();
+            this.overallProgress = new System.Windows.Forms.ProgressBar();
             this.mainMessageLabel = new System.Windows.Forms.Label();
-            this.progressCurrentRanker = new System.Windows.Forms.ProgressBar();
             this.copyDataButton = new System.Windows.Forms.Button();
-            this.updateNewEntriesButton = new System.Windows.Forms.Button();
+            this.updateWithoutOverwriteButton = new System.Windows.Forms.Button();
             this.convertDataButton = new System.Windows.Forms.Button();
             this.startDatePicker = new System.Windows.Forms.DateTimePicker();
             this.startDateLabel = new System.Windows.Forms.Label();
@@ -46,41 +45,50 @@
             this.branchLabel = new System.Windows.Forms.Label();
             this.helpProvider = new System.Windows.Forms.HelpProvider();
             this.dateSelectorsLabel = new System.Windows.Forms.Label();
-            this.currentProgressLabel = new System.Windows.Forms.Label();
             this.overallProgressLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.uploadDataLabel = new System.Windows.Forms.Label();
             this.uploadToAccessButton = new System.Windows.Forms.Button();
             this.uploadToSQLButton = new System.Windows.Forms.Button();
             this.updateOverwriteEntriesButton = new System.Windows.Forms.Button();
+            this.copyDataBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.cleanDataBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.convertDataBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.updateDataWithoutOverwriteBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.currentOperationProgressLabel = new System.Windows.Forms.Label();
+            this.currentProgress = new System.Windows.Forms.ProgressBar();
+            this.uploadToNetworkDriveButton = new System.Windows.Forms.Button();
+            this.uploadToNetworkDriveBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.uploadToAccessBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.closeWindowButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // abortUpdateButton
             // 
             this.abortUpdateButton.Location = new System.Drawing.Point(12, 600);
             this.abortUpdateButton.Name = "abortUpdateButton";
-            this.abortUpdateButton.Size = new System.Drawing.Size(413, 50);
+            this.abortUpdateButton.Size = new System.Drawing.Size(285, 50);
             this.abortUpdateButton.TabIndex = 7;
-            this.abortUpdateButton.Text = "Abort";
+            this.abortUpdateButton.Text = "Cancel Current Operation";
             this.abortUpdateButton.UseVisualStyleBackColor = true;
             this.abortUpdateButton.Click += new System.EventHandler(this.buttonCancelCleanData_Click);
             // 
-            // AppendDataButton
+            // cleanDataButton
             // 
-            this.AppendDataButton.Location = new System.Drawing.Point(531, 43);
-            this.AppendDataButton.Name = "AppendDataButton";
-            this.AppendDataButton.Size = new System.Drawing.Size(75, 23);
-            this.AppendDataButton.TabIndex = 8;
-            this.AppendDataButton.Text = "Clean Data";
-            this.AppendDataButton.UseVisualStyleBackColor = true;
-            this.AppendDataButton.Click += new System.EventHandler(this.buttonConfirmCleanData_Click);
+            this.cleanDataButton.Location = new System.Drawing.Point(531, 43);
+            this.cleanDataButton.Name = "cleanDataButton";
+            this.cleanDataButton.Size = new System.Drawing.Size(75, 23);
+            this.cleanDataButton.TabIndex = 8;
+            this.cleanDataButton.Text = "Clean Data";
+            this.cleanDataButton.UseVisualStyleBackColor = true;
+            this.cleanDataButton.Click += new System.EventHandler(this.buttonConfirmCleanData_Click);
             // 
-            // progressOverall
+            // overallProgress
             // 
-            this.progressOverall.Location = new System.Drawing.Point(531, 161);
-            this.progressOverall.Name = "progressOverall";
-            this.progressOverall.Size = new System.Drawing.Size(413, 23);
-            this.progressOverall.TabIndex = 9;
+            this.overallProgress.Location = new System.Drawing.Point(531, 161);
+            this.overallProgress.Name = "overallProgress";
+            this.overallProgress.Size = new System.Drawing.Size(413, 23);
+            this.overallProgress.TabIndex = 9;
             // 
             // mainMessageLabel
             // 
@@ -92,13 +100,6 @@
             this.mainMessageLabel.TabIndex = 10;
             this.mainMessageLabel.Text = "Update Data Control Panel";
             // 
-            // progressCurrentRanker
-            // 
-            this.progressCurrentRanker.Location = new System.Drawing.Point(531, 243);
-            this.progressCurrentRanker.Name = "progressCurrentRanker";
-            this.progressCurrentRanker.Size = new System.Drawing.Size(413, 23);
-            this.progressCurrentRanker.TabIndex = 11;
-            // 
             // copyDataButton
             // 
             this.copyDataButton.Location = new System.Drawing.Point(531, 14);
@@ -109,14 +110,15 @@
             this.copyDataButton.UseVisualStyleBackColor = true;
             this.copyDataButton.Click += new System.EventHandler(this.copyDataButton_Click);
             // 
-            // updateNewEntriesButton
+            // updateWithoutOverwriteButton
             // 
-            this.updateNewEntriesButton.Location = new System.Drawing.Point(12, 433);
-            this.updateNewEntriesButton.Name = "updateNewEntriesButton";
-            this.updateNewEntriesButton.Size = new System.Drawing.Size(208, 50);
-            this.updateNewEntriesButton.TabIndex = 14;
-            this.updateNewEntriesButton.Text = "Update without Overwrite";
-            this.updateNewEntriesButton.UseVisualStyleBackColor = true;
+            this.updateWithoutOverwriteButton.Location = new System.Drawing.Point(12, 433);
+            this.updateWithoutOverwriteButton.Name = "updateWithoutOverwriteButton";
+            this.updateWithoutOverwriteButton.Size = new System.Drawing.Size(208, 50);
+            this.updateWithoutOverwriteButton.TabIndex = 14;
+            this.updateWithoutOverwriteButton.Text = "Update without Overwrite";
+            this.updateWithoutOverwriteButton.UseVisualStyleBackColor = true;
+            this.updateWithoutOverwriteButton.Click += new System.EventHandler(this.updateNewEntriesButton_Click);
             // 
             // convertDataButton
             // 
@@ -246,16 +248,6 @@
             this.dateSelectorsLabel.TabIndex = 26;
             this.dateSelectorsLabel.Text = "Step 3) Select Begin and End Date";
             // 
-            // currentProgressLabel
-            // 
-            this.currentProgressLabel.AutoSize = true;
-            this.currentProgressLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.currentProgressLabel.Location = new System.Drawing.Point(528, 224);
-            this.currentProgressLabel.Name = "currentProgressLabel";
-            this.currentProgressLabel.Size = new System.Drawing.Size(177, 16);
-            this.currentProgressLabel.TabIndex = 27;
-            this.currentProgressLabel.Text = "Progress - Current Operation";
-            // 
             // overallProgressLabel
             // 
             this.overallProgressLabel.AutoSize = true;
@@ -294,6 +286,7 @@
             this.uploadToAccessButton.TabIndex = 31;
             this.uploadToAccessButton.Text = "Upload to Access (Old)";
             this.uploadToAccessButton.UseVisualStyleBackColor = true;
+            this.uploadToAccessButton.Click += new System.EventHandler(this.uploadToAccessButton_Click);
             // 
             // uploadToSQLButton
             // 
@@ -313,18 +306,94 @@
             this.updateOverwriteEntriesButton.Text = "Update with Overwrite";
             this.updateOverwriteEntriesButton.UseVisualStyleBackColor = true;
             // 
+            // copyDataBackgroundWorker
+            // 
+            this.copyDataBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.copyDataBackgroundWorker_DoWork);
+            this.copyDataBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.copyDataBackgroundWorker_ProgressChanged);
+            this.copyDataBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.copyDataBackgroundWorker_RunWorkerCompleted);
+            // 
+            // cleanDataBackgroundWorker
+            // 
+            this.cleanDataBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.cleanDataBackgroundWorker_DoWork);
+            this.cleanDataBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.cleanDataBackgroundWorker_ProgressChanged);
+            this.cleanDataBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.cleanDataBackgroundWorker_RunWorkerCompleted);
+            // 
+            // convertDataBackgroundWorker
+            // 
+            this.convertDataBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.convertDataBackgroundWorker_DoWork);
+            this.convertDataBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.convertDataBackgroundWorker_ProgressChanged);
+            this.convertDataBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.convertDataBackgroundWorker_RunWorkerCompleted);
+            // 
+            // updateDataWithoutOverwriteBackgroundWorker
+            // 
+            this.updateDataWithoutOverwriteBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateDataWithoutOverwriteBackgroundWorker_DoWork);
+            this.updateDataWithoutOverwriteBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.updateDataWithoutOverwriteBackgroundWorker_ProgressChanged);
+            this.updateDataWithoutOverwriteBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateDataWithoutOverwriteBackgroundWorker_RunWorkerCompleted);
+            // 
+            // currentOperationProgressLabel
+            // 
+            this.currentOperationProgressLabel.AutoSize = true;
+            this.currentOperationProgressLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
+            this.currentOperationProgressLabel.Location = new System.Drawing.Point(528, 201);
+            this.currentOperationProgressLabel.Name = "currentOperationProgressLabel";
+            this.currentOperationProgressLabel.Size = new System.Drawing.Size(177, 16);
+            this.currentOperationProgressLabel.TabIndex = 34;
+            this.currentOperationProgressLabel.Text = "Progress - Current Operation";
+            // 
+            // currentProgress
+            // 
+            this.currentProgress.Location = new System.Drawing.Point(531, 220);
+            this.currentProgress.Name = "currentProgress";
+            this.currentProgress.Size = new System.Drawing.Size(413, 23);
+            this.currentProgress.TabIndex = 35;
+            // 
+            // uploadToNetworkDriveButton
+            // 
+            this.uploadToNetworkDriveButton.Location = new System.Drawing.Point(428, 530);
+            this.uploadToNetworkDriveButton.Name = "uploadToNetworkDriveButton";
+            this.uploadToNetworkDriveButton.Size = new System.Drawing.Size(200, 50);
+            this.uploadToNetworkDriveButton.TabIndex = 36;
+            this.uploadToNetworkDriveButton.Text = "Upload to Network Drive";
+            this.uploadToNetworkDriveButton.UseVisualStyleBackColor = true;
+            this.uploadToNetworkDriveButton.Click += new System.EventHandler(this.uploadToNetworkDriveButton_Click);
+            // 
+            // uploadToNetworkDriveBackgroundWorker
+            // 
+            this.uploadToNetworkDriveBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.uploadToNetworkDriveBackgroundWorker_DoWork);
+            this.uploadToNetworkDriveBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.uploadToNetworkDriveBackgroundWorker_ProgressChanged);
+            this.uploadToNetworkDriveBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.uploadToNetworkDriveBackgroundWorker_RunWorkerCompleted);
+            // 
+            // uploadToAccessBackgroundWorker
+            // 
+            this.uploadToAccessBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.uploadToAccessBackgroundWorker_DoWork);
+            this.uploadToAccessBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.uploadToAccessBackgroundWorker_ProgressChanged);
+            this.uploadToAccessBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.uploadToAccessBackgroundWorker_RunWorkerCompleted);
+            // 
+            // closeWindowButton
+            // 
+            this.closeWindowButton.Location = new System.Drawing.Point(303, 600);
+            this.closeWindowButton.Name = "closeWindowButton";
+            this.closeWindowButton.Size = new System.Drawing.Size(325, 50);
+            this.closeWindowButton.TabIndex = 37;
+            this.closeWindowButton.Text = "Close Window";
+            this.closeWindowButton.UseVisualStyleBackColor = true;
+            this.closeWindowButton.Click += new System.EventHandler(this.closeWindowButton_Click);
+            // 
             // updateDataForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1033, 685);
+            this.Controls.Add(this.closeWindowButton);
+            this.Controls.Add(this.uploadToNetworkDriveButton);
+            this.Controls.Add(this.currentProgress);
+            this.Controls.Add(this.currentOperationProgressLabel);
             this.Controls.Add(this.updateOverwriteEntriesButton);
             this.Controls.Add(this.uploadToSQLButton);
             this.Controls.Add(this.uploadToAccessButton);
             this.Controls.Add(this.uploadDataLabel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.overallProgressLabel);
-            this.Controls.Add(this.currentProgressLabel);
             this.Controls.Add(this.dateSelectorsLabel);
             this.Controls.Add(this.branchLabel);
             this.Controls.Add(this.dataTypeLabel);
@@ -335,18 +404,18 @@
             this.Controls.Add(this.startDateLabel);
             this.Controls.Add(this.startDatePicker);
             this.Controls.Add(this.convertDataButton);
-            this.Controls.Add(this.updateNewEntriesButton);
+            this.Controls.Add(this.updateWithoutOverwriteButton);
             this.Controls.Add(this.copyDataButton);
-            this.Controls.Add(this.progressCurrentRanker);
             this.Controls.Add(this.mainMessageLabel);
-            this.Controls.Add(this.progressOverall);
-            this.Controls.Add(this.AppendDataButton);
+            this.Controls.Add(this.overallProgress);
+            this.Controls.Add(this.cleanDataButton);
             this.Controls.Add(this.abortUpdateButton);
             this.HelpButton = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "updateDataForm";
             this.Text = "Update Data Control Panel";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.updateDataForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -354,12 +423,11 @@
 
         #endregion
         private System.Windows.Forms.Button abortUpdateButton;
-        private System.Windows.Forms.Button AppendDataButton;
-        private System.Windows.Forms.ProgressBar progressOverall;
+        private System.Windows.Forms.Button cleanDataButton;
+        private System.Windows.Forms.ProgressBar overallProgress;
         private System.Windows.Forms.Label mainMessageLabel;
-        private System.Windows.Forms.ProgressBar progressCurrentRanker;
         private System.Windows.Forms.Button copyDataButton;
-        private System.Windows.Forms.Button updateNewEntriesButton;
+        private System.Windows.Forms.Button updateWithoutOverwriteButton;
         private System.Windows.Forms.Button convertDataButton;
         private System.Windows.Forms.DateTimePicker startDatePicker;
         private System.Windows.Forms.Label startDateLabel;
@@ -371,12 +439,21 @@
         private System.Windows.Forms.Label branchLabel;
         private System.Windows.Forms.HelpProvider helpProvider;
         private System.Windows.Forms.Label dateSelectorsLabel;
-        private System.Windows.Forms.Label currentProgressLabel;
         private System.Windows.Forms.Label overallProgressLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label uploadDataLabel;
         private System.Windows.Forms.Button uploadToAccessButton;
         private System.Windows.Forms.Button uploadToSQLButton;
         private System.Windows.Forms.Button updateOverwriteEntriesButton;
+        private System.ComponentModel.BackgroundWorker copyDataBackgroundWorker;
+        private System.ComponentModel.BackgroundWorker cleanDataBackgroundWorker;
+        private System.ComponentModel.BackgroundWorker convertDataBackgroundWorker;
+        private System.ComponentModel.BackgroundWorker updateDataWithoutOverwriteBackgroundWorker;
+        private System.Windows.Forms.Label currentOperationProgressLabel;
+        private System.Windows.Forms.ProgressBar currentProgress;
+        private System.Windows.Forms.Button uploadToNetworkDriveButton;
+        private System.ComponentModel.BackgroundWorker uploadToNetworkDriveBackgroundWorker;
+        private System.ComponentModel.BackgroundWorker uploadToAccessBackgroundWorker;
+        private System.Windows.Forms.Button closeWindowButton;
     }
 }

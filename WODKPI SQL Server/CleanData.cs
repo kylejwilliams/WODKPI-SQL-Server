@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.ComponentModel;
 using System.IO;
 
 namespace WODKPI_SQL_Server
@@ -10,24 +11,21 @@ namespace WODKPI_SQL_Server
     {
         #region GLOBALS
 
-        List<int> indexes_1CE = new List<int> { 0, 6,  13, 28, 48, 75, 91                                              };
-        List<int> indexes_6PU = new List<int> { 0, 8,  15, 22, 43, 71                                                  };
-        List<int> indexes_AN6 = new List<int> { 0, 9,  15, 21, 42, 55, 70                                              };
-        List<int> indexes_OUT = new List<int> { 0, 6,  32, 38, 59, 84, 96, 103, 119, 124, 130, 144                     };
-        List<int> indexes_R81 = new List<int> { 0, 6,  26, 32, 67, 74, 80,  97, 108, 119, 130, 134, 151, 177, 181, 192 };
-        List<int> indexes_Z90 = new List<int> { 0, 6,  12, 34, 43, 46, 49,  60,  68,  75,  91, 102, 109, 121           };
-        List<int> indexes_ZIA = new List<int> { 0, 12, 31, 57, 63, 68, 73,  91, 106, 114, 120                          };
+        List<int> indexes_1CE = new List<int> { 0,  6, 13, 28, 49, 76, 91                                             };
+        List<int> indexes_6PU = new List<int> { 0,  7, 14, 21, 42, 70                                                 };
+        List<int> indexes_AN6 = new List<int> { 0,  8, 14, 20, 42, 54, 69, 84                                         };
+        List<int> indexes_OUT = new List<int> { 0,  6, 32, 38, 59, 74, 84, 94, 103, 119, 125, 131, 146                };
+        List<int> indexes_R81 = new List<int> { 0,  6, 26, 32, 67, 74, 80, 99, 108, 119, 131, 137, 152, 176, 181, 192 };
+        List<int> indexes_Z90 = new List<int> { 0,  6, 12, 34, 43, 46, 49, 60,  68,  75,  92, 103, 110                };
+        List<int> indexes_ZIA = new List<int> { 0,  6, 12, 33, 56, 63, 68, 76,  90, 106, 120                          };
 
-        List<int> lengths_1CE = new List<int> { 6,  7, 15, 20, 28, 15, 15                                };
-        List<int> lengths_6PU = new List<int> { 8,  7,  7, 21, 28, 12                                    };
-        List<int> lengths_AN6 = new List<int> { 9,  6,  6, 22, 12, 15, 15                                };
-        List<int> lengths_OUT = new List<int> { 6, 26, 27, 37, 17,  7,  5,  6, 15,  5                    };
-        List<int> lengths_R81 = new List<int> { 6, 20,  6, 35,  7,  6, 17, 11, 11,  7, 15, 24,  4, 12, 5 };
-        List<int> lengths_Z90 = new List<int> { 6,  6, 22,  9,  3,  3, 11,  8,  7, 17, 12,  7, 11        };
-        List<int> lengths_ZIA = new List<int> { 6,  6, 19, 26,  6,  5,  5, 18, 29,  4                    };
-
-        ProgressBar pb;
-        Form mainForm;
+        List<int> lengths_1CE = new List<int> { 6,  7, 15, 21, 27, 15, 15                                             };
+        List<int> lengths_6PU = new List<int> { 7,  7,  7, 21, 28, 11                                                 };
+        List<int> lengths_AN6 = new List<int> { 8,  6,  6, 22, 12, 15, 15,  7                                         };
+        List<int> lengths_OUT = new List<int> { 6, 26,  6, 21, 15, 10, 10,  9,  16,   6,    6,  15,   5               };
+        List<int> lengths_R81 = new List<int> { 6, 20,  6, 35,  7,  6, 19,  9,  11,  12,    6,  15,  24,  5,  11,   5 };
+        List<int> lengths_Z90 = new List<int> { 6,  6, 22,  9,  3,  3, 11,  8,   7,  17,   11,   7,  11               };
+        List<int> lengths_ZIA = new List<int> { 6,  6, 21, 23,  7,  5,  8, 14,  16,  14,    5                         };
 
         #endregion
 
@@ -36,40 +34,22 @@ namespace WODKPI_SQL_Server
 
         }
 
-        public CleanData(ProgressBar pb, Form mainForm)
-        {
-            this.pb = pb;
-            this.mainForm = mainForm;
-        }
-
         private void CleanFiles(string srcPath, string dstPath)
         {
             HashSet<string> hs = new HashSet<string>();
 
             List<string> fileNames = Directory.GetFiles(srcPath).ToList();
             List<string> lines = new List<string>();
-
-            mainForm.Invoke((MethodInvoker)delegate
+            
+            for (int i = 0; i < fileNames.Count; i++)
             {
-                // setup our progress bar
-                pb.Minimum = 1;
-                pb.Maximum = fileNames.Count();
-                pb.Value = 1;
-                pb.Step = 1;
-            });
-
-            foreach (string fileName in fileNames)
-            {
-                mainForm.Invoke((MethodInvoker)delegate
-                {
-                    pb.PerformStep();
-                });
+                string fileName = fileNames[i];
                 
                 lines = File.ReadAllLines(fileName).ToList<string>();
                 foreach (string line in lines)
                 {
                     string cleanLine = line.Trim();
-                    if (CheckLine(cleanLine))
+                    if (!IsBadLine(cleanLine))
                         hs.Add(cleanLine);
                 }
             }
@@ -94,10 +74,8 @@ namespace WODKPI_SQL_Server
             return newFiles.ToList();
         }
 
-        // TODO fix process for skipping the next line
-        private bool CheckLine(string line)
+        private bool IsBadLine(string line)
         {
-            bool skipNextLine = false;
             double d;
 
             // common keywords shared among headers (that we don't want included)
@@ -110,22 +88,18 @@ namespace WODKPI_SQL_Server
                     "EUGENE",
                     "PAGE",
                     "RFM.#",
+                    "*",
+                    "FINAL",
+                    "28",
+                    "=",
+                    "EXT"
             };
 
-            if (line.StartsWith("*") ||
-                line.StartsWith("FINAL"))
-            {
-                skipNextLine = true;
-            }
-
-            return !(badLines.Any(line.StartsWith)) ||                                     // multiple
+            return  (badLines.Any(line.StartsWith)) ||                                     // multiple
                     (line == "") ||                                                        // multiple
                     (line.EndsWith("-")) ||                                                // 6PU
                     (System.Text.RegularExpressions.Regex.IsMatch(line, @"^\d+$")) ||      // 6PU
-                    (line.StartsWith("28")) ||                                             // 6PU
                     (line == "C14") ||                                                     // OUT
-                    (skipNextLine) ||                                                      // 1CE (multiple?)
-                    (line.StartsWith("=")) ||                                              // OUT
                     (System.Double.TryParse(line.Split(' ')[0], out d)) ||                 // OUT
                     (line.Split(' ').Length == 2);                                         // R81
         }
@@ -136,7 +110,7 @@ namespace WODKPI_SQL_Server
             return pathPieces[pathPieces.Length - 1];
         }
 
-        public void InitClean(string ranker, Form myForm)
+        public void InitClean(string ranker)
         {
             string srcPath = @"C:\Users\y712969\Desktop\Ranker Text Files\" + ranker;
             string dstPath = @"C:\Users\y712969\Desktop\Ranker Text Files\CLEAN\" + ranker + "_clean.txt";
@@ -152,7 +126,6 @@ namespace WODKPI_SQL_Server
             List<int> indexes;
             List<int> lengths;
             int numPadding = 0;
-            string firstHeaderField = "";
 
             string ranker = GetFileName(srcPath);
             switch(ranker)
@@ -160,7 +133,6 @@ namespace WODKPI_SQL_Server
                 case "1CE_clean.txt":
                     indexes = indexes_1CE;
                     lengths = lengths_1CE;
-
                     break;
                 case "6PU_clean.txt":
                     indexes = indexes_6PU;
@@ -185,27 +157,53 @@ namespace WODKPI_SQL_Server
                 case "ZIA_clean.txt":
                     indexes = indexes_ZIA;
                     lengths = lengths_ZIA;
-                    firstHeaderField = "WHS#";
                     break;
                 default:
                     throw new System.Exception("ERROR: srcPath is not a valid ranker!");
             }
 
-            for (int i = 0; i < rankerFile.Count(); i++)
+            // have to go backwards so we can concurrently remove elements from list
+            for (int i = (rankerFile.Count - 1); i >= 0; i--)
+            //for (int i = 0; i < rankerFile.Count; i++)
             {
-                //if (rankerFile[i].StartsWith(firstHeaderField)) // the header isn't the same length as the other lines
-                //    rankerFile[i] = new string(' ', numPadding); // add some spaces to get the line to match up with the rest
-                //else if (rankerFile[i].Length != lengths.Sum() - 1) // -1 is for 0-based indexing purposes; checks if string is valid
-                //    continue;                                       // (skips all rows not containing data)
+                // need to ensure every line is long enough
+                if (rankerFile[i].Length < lengths.Sum())
+                {
+                    numPadding = lengths.Sum() - rankerFile[i].Length;
+                    rankerFile[i] = rankerFile[i] + new string(' ', numPadding);
+                }
 
                 for (int j = 0; j < indexes.Count; j++)
-                    fields.Add(rankerFile[i].Substring(indexes[j], lengths[j]).Trim());
+                {
+                    try
+                    {
+                        string tmp = rankerFile[i].Substring(indexes[j], lengths[j]).Trim();
+                        tmp = tmp.Replace(',', '^'); // need to avoid putting extra commas in our csv; '^' was chosen arbitrarily (can be any unused character)
+                        tmp = tmp.Replace('\'', '%'); // same as above
+                        fields.Add(tmp);
+                    }
+                    catch (System.ArgumentOutOfRangeException e)
+                    {
+                        MessageBox.Show("ERROR: Indexing for the columns out of place when converting from *.txt to *.csv.\nAlert Kyle Williams at kyle.williams2@anheuser-busch.com");
+                        break;
+                    }
+                }
 
+                rankerFile.RemoveAt(i); // memory purposes; too many lists getting hella big
+                                        // zero indexed because we each time we remove one, the next line moves up to position 0
                 csvStrings.Add(System.String.Join(",", fields));
                 fields.Clear();
             }
-
-            File.WriteAllLines(dstPath, csvStrings);
+            
+            try
+            {
+                csvStrings.Reverse(); // need to reverse the data since we read it in backwards
+                File.WriteAllLines(dstPath, csvStrings);
+            }
+            catch (System.IO.IOException e)
+            {
+                MessageBox.Show("ERROR: File is open in another program. Please close this file and try again.");
+            }
         }
 
         public int CopyDirectory(string srcPath, string dstPath, bool overwriteFiles, int copiedFiles = 0)
