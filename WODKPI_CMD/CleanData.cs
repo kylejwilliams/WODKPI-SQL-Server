@@ -1,11 +1,11 @@
 ﻿
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Forms;
 
-namespace WODKPI_SQL_Server
+namespace WODKPI_CMD
 {
     class CleanData
     {
@@ -171,10 +171,33 @@ namespace WODKPI_SQL_Server
 
         public void InitClean(string ranker)
         {
-            string srcPath = @"C:\Users\y712969\Desktop\Ranker Text Files\" + ranker;
-            string dstPath = @"C:\Users\y712969\Desktop\Ranker Text Files\CLEAN\" + ranker + "_clean.txt";
+            if (ranker.ToLower() == "all")
+            {
+                string[] rankers =
+                {
+                    "1CE",
+                    "6PU",
+                    "AN6",
+                    "OUT",
+                    "R81",
+                    "Z90",
+                    "ZIA"
+                };
 
-            CleanFiles(srcPath, dstPath);
+                foreach (string r in rankers)
+                {
+                    string srcPath = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\" + r;
+                    string dstPath = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\CLEAN\" + r + "_clean.txt";
+                    CleanFiles(srcPath, dstPath);
+                }
+            }
+            else
+            {
+                string srcPath = @"C:\Users\y712969\Desktop\Ranker Text Files\" + ranker;
+                string dstPath = @"C:\Users\y712969\Desktop\Ranker Text Files\CLEAN\" + ranker + "_clean.txt";
+                CleanFiles(srcPath, dstPath);
+            }
+            
         }
 
         // not a "real" csv, because it's delimited by pipes (" || "), but you get the idea
@@ -326,6 +349,39 @@ namespace WODKPI_SQL_Server
             }
 
             File.WriteAllLines(dstPath, validLines.ToArray());
+        }
+
+        public void ProcessDirectory(string srcPath, string dstPath)
+        {
+            DirectoryInfo dir = new DirectoryInfo(srcPath);
+
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + srcPath);
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            if (!Directory.Exists(dstPath))
+                Directory.CreateDirectory(dstPath);
+
+            FileInfo[] files = dir.GetFiles();
+
+            foreach (FileInfo file in files)
+            {
+                string tmpPath = Path.Combine(dstPath);
+                ProcessFile(file, tmpPath);
+            }
+                
+            foreach (DirectoryInfo subDir in dirs)
+            {
+                string tmpPath = Path.Combine(dstPath, subDir.Name);
+                ProcessDirectory(subDir.FullName, tmpPath);
+            }
+        }
+
+        public void ProcessFile(FileInfo file, string dstPath, bool overwriteFiles = false)
+        {
+            FileInfo dstFile = new FileInfo(Path.Combine(dstPath, file.Name));
+            if (!dstFile.Exists || (file.LastWriteTime > dstFile.LastWriteTime && overwriteFiles == true))
+                file.CopyTo(dstFile.FullName, true);
         }
     }
 }

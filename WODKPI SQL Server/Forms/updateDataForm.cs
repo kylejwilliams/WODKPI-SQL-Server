@@ -14,7 +14,6 @@ namespace WODKPI_SQL_Server
     {
         BackgroundWorker bw;
         CleanData cd;
-        AccessDB aDB;
 
         public updateDataForm()
         {
@@ -55,15 +54,7 @@ namespace WODKPI_SQL_Server
             uploadToNetworkDriveBackgroundWorker.ProgressChanged += uploadToNetworkDriveBackgroundWorker_ProgressChanged;
             uploadToNetworkDriveBackgroundWorker.RunWorkerCompleted += uploadToNetworkDriveBackgroundWorker_RunWorkerCompleted;
 
-            uploadToAccessBackgroundWorker = new BackgroundWorker();
-            uploadToAccessBackgroundWorker.WorkerReportsProgress = true;
-            uploadToAccessBackgroundWorker.WorkerSupportsCancellation = true;
-            uploadToAccessBackgroundWorker.DoWork += uploadToAccessBackgroundWorker_DoWork;
-            uploadToAccessBackgroundWorker.ProgressChanged += uploadToAccessBackgroundWorker_ProgressChanged;
-            uploadToAccessBackgroundWorker.RunWorkerCompleted += uploadToAccessBackgroundWorker_RunWorkerCompleted;
-
             cd = new CleanData();
-            aDB = new AccessDB();
             bw = new BackgroundWorker(); // will hold a reference to the background worker that called each method to pass events
         }
 
@@ -629,12 +620,6 @@ namespace WODKPI_SQL_Server
         private void uploadToNetworkDriveButton_Click(object sender, EventArgs e)
         {
             uploadToNetworkDriveBackgroundWorker.RunWorkerAsync();
-        }
-
-        private void uploadToAccessBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            //aDB.accessTestConnection(sender, e);
-            aDB.CsvFileToDataTable(sender, e);
         }
 
         private void uploadToAccessBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)

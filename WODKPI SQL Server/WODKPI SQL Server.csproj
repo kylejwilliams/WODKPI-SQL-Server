@@ -63,7 +63,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessDB.cs" />
     <Compile Include="CleanData.cs" />
     <Compile Include="DBs\RefusalsTestDataSet.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -89,6 +88,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlDB.cs" />
     <EmbeddedResource Include="Forms\updateDataForm.resx">
       <DependentUpon>updateDataForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -148,6 +148,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GenericParsing\GenericParsing.csproj">
+      <Project>{add325f8-cbd9-43fe-850d-e2f34d736c9d}</Project>
+      <Name>GenericParsing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
