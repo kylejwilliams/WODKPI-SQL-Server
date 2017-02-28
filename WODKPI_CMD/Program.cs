@@ -1,281 +1,279 @@
-﻿using System;
+﻿
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace WODKPI_CMD
 {
     static class Program
     {
-        #region REFUSAL CONSTS
+        public static string sclDataSrc = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\S90 Rankers\S90_clean.txt";
+        public static string superDataSrc = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\SU6 Rankers\SU6_clean.txt";
+        public static string connStr = @"Data Source=ABCSTLT6602;Initial Catalog=WOD_RAS;Integrated Security=True;";// False;User=srvWODKPI;PWD=password123456";
+        public static string sclCreateTempFile = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\createSCL.sql";
+        public static string superCreateTempFile = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\createSU6.sql";
+        public static string sclInsertData = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\updateSCL.sql";
+        public static string superInsertData = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\updateSU6.sql";
 
-        public static string refusalsDataSrc = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\CLEAN\R81_clean.txt";
-        public static string refusalsConnStr = @"Data Source=ABCSTLT6602;Initial Catalog=WODKPI_Refusals;Integrated Security=True";
-        public static string refusalsCreateTempFile = @"C:\Users\y712969\Desktop\Queries\WODKPI_Refusals\Non-Sequential\00 - createTempRefusals.sql";
-        public static string refusalsDropTables = @"C:\Users\y712969\Desktop\Queries\WODKPI_Refusals\Non-Sequential\dropTables.sql";
-        public static string refusalsCreateMiscTablesQueryPath = @"C:\Users\y712969\Desktop\Queries\WODKPI_Refusals";
-        public static string refusalsDir = @"C:\Users\y712969\Desktop\WODKPI Data\CLEAN\";
-        public static int[] refusalsColWidths = new int[]
+        public static string delVolAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\deleteVolumesAccess.sql";
+        public static string insVolAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\importVolumesToAccess.sql";
+        public static string delRefAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\deleteRefusalsAccess.sql";
+        public static string insRefAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\importRefusalsToAccess.sql";
+        public static string delOosAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\deleteOOSAccess.sql";
+        public static string insOosAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\importOOSToAccess.sql";
+        public static string delSclAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\deleteSCLAccess.sql";
+        public static string insSclAccessPth = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\Queries\importSCLToAccess.sql";
+
+        public static List<int> lengths_SU6 = new List<int>
         {
-            6,  // rep#
-            14, // repName
-            11, // cust#
-            26, // custName
-            17, // inv#
-            6,  // item#
-            20, // itemDesc
-            8,  // itemQty
-            11, // item$
-            12, // orderDate
-            6,  // driver#
-            15, // driverName
-            24, // reason
-            8,  // load#
-            8,  // CE
-            9,  // PDCN
-            21  // branch
+            3,  // WH#
+            9,  // inv date
+            6,  // acct num
+            26, // acct desc
+            11, // inv num
+            3,  // line num
+            6,  // item num
+            6,  // pdcn
+            22, // item desc
+            6,  // qty
+            11, // price
+            5,  // oos
+            7,  // oz
+            8,  // cpkg
+            3,  // rc
+            19, // rc desc *
+            6,  // rep# *
+            15, // rep name
+            5,  // load #
+            6,  // driver #
+            15, // driver name
+            25, // branch length + 4 padding
         };
-        public static string[] refusalsColNames = new string[]
+        public static List<int> lengths_S90 = new List<int>
         {
-            "rep#",         // 
-            "repName",      //
-            "cust#",        //
-            "custName",     //
-            "inv#",         //
-            "item#",        //
-            "itemDesc",     //
-            "itemQty",      //
-            "item$",        //
-            "orderDate",    //
-            "driver#",      //
-            "driverName",   // 
-            "reason",       //
-            "load#",        //
-            "CE",           //
-            "PDCN",         //
-            "branch"        //
-        };
-
-        #endregion
-        #region OUT OF STOCKS CONSTS
-
-        public static string outOfStocksDataSrc = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\CLEAN\OUT_clean.txt";
-        public static string outOfStocksConnStr = @"Data Source=ABCSTLT6602;Initial Catalog=WODKPI_OutOfStocks;Integrated Security=True";
-        public static string outOfStocksCreateTempFile = @"C:\Users\y712969\Desktop\Queries\WODKPI_OutOfStocks\Non-Sequential\00 - CreateTempOutOfStocks.sql";
-        public static string outOfStocksDropTables = @"C:\Users\y712969\Desktop\Queries\WODKPI_OutOfStocks\Non-Sequential\dropTables.sql";
-        public static string outOfStocksCreateMiscTablesQueryPath = @"C:\Users\y712969\Desktop\Queries\WODKPI_OutOfStocks\";
-        public static int[] outOfStocksColWidths = new int[]
-        {
-            6,  // ACCT#
-            26, // DBA
+            6,  // WH#
             6,  // ITEM#
-            21, // DESC
-            26, // QTY FILLED
-            11, // C14 DIV 288
-            17, // INV DATE
-            7,  // INV#
-            5,  // LOAD
-            6,  // SM#
-            15, // SM NAME
-            14,  // PDCN
-            21  // branch
+            25, // ITEM DESC
+            6,  // QTY
+            3,  // TC
+            3,  // RC
+            10, // RC DESC
+            9,  // DATE
+            10, // USER
+            14, // UNIT COST
+            11, // EXACT COST
+            7,  // ONE DAY
+            15, // DAYS OUT OF INVENTORY
+            15, // CE QTY
+            25  // branch + 4 padding
         };
-        public static string[] outOfStocksColNames = new string[]
+        public static List<string> superColNames = new List<string>
         {
-            "ACCT#",
-            "DBA",
-            "ITEM#",
-            "DESC",
-            "QTY FILLED",
-            "C14 DIV 288",
-            "INV DATE",
-            "INV#",
-            "LOAD",
-            "SM#",
-            "SM NAME",
-            "PDCN",
-            "Branch"
-        };
-
-        #endregion
-        #region VOLUME CONSTS
-
-        public static string volumeDataSrc = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\CLEAN\AN6_clean.txt";
-        public static string volumeConnStr = @"Data Source=ABCSTLT6602;Initial Catalog=WODKPI_Volume;Integrated Security=True";
-        public static string volumeCreateTempFile = @"C:\Users\y712969\Desktop\Queries\WODKPI_Volume\Non-Sequential\00 - createTempVolume.sql";
-        public static string volumeDropTables = @"C:\Users\y712969\Desktop\Queries\WODKPI_Volume\Non-Sequential\dropTables.sql";
-        public static string volumeCreateMiscTablesQueryPath = @"C:\Users\y712969\Desktop\Queries\WODKPI_Volume\";
-        public static int[] volumeColWidths = new int[]
-        {
-            9,  // invoice date
-            6,  // warehouse num
-            6,  // item num
-            22, // item desc
-            12, // unit qty
-            15, // CE qty
-            15, // BE qty
-            13, // BXBRCD
-            25  // Branch
-        };
-        public static string[] volumeColNames = new string[]
-        {
-            "INV DATE",
             "WH#",
-            "ITEM#",
-            "DESC",
-            "UNIT QTY",
-            "CE QTY",
-            "BE QTY",
+            "INV DATE",
+            "ACCT NUM",
+            "ACCT DESC",
+            "INV NUM",
+            "LINE NUM",
+            "ITEM NUM",
             "PDCN",
-            "Branch"
+            "ITEM DESC",
+            "QTY",
+            "PRICE",
+            "OOS",
+            "OZ",
+            "C/PKG",
+            "RC",
+            "RC DESC",
+            "REP#",
+            "REP NAME",
+            "LOAD #",
+            "DRIVER #",
+            "DRIVER NAME",
+            "BRANCH"
         };
-
-        #endregion
-        #region SUPPLY CHAIN LOSS CONSTS
-
-        public static string supplyChainLossDataSrc = @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\CLEAN\Z90_clean.txt";
-        public static string supplyChainLossConnStr = @"Data Source=ABCSTLT6602;Initial Catalog=WODKPI_SupplyChainLoss;Integrated Security=True";
-        public static string supplyChainLossCreateTempFile = @"C:\Users\y712969\Desktop\Queries\WODKPI_SupplyChainLoss\Non-Sequential\00 - createTempSupplyChainLoss.sql";
-        public static string supplyChainLossDropTables = @"C:\Users\y712969\Desktop\Queries\WODKPI_SupplyChainLoss\Non-Sequential\dropTables.sql";
-        public static string supplyChainLossCreateMiscTablesQueryPath = @"C:\Users\y712969\Desktop\Queries\WODKPI_SupplyChainLoss\";
-        public static int[] supplyChainLossColWidths = new int[]
-        {
-            6,  // warehouse num
-            6,  // item num
-            22, // item desc
-            9,  // qty
-            3,  // transaction type
-            3,  // reason code
-            10, // reason desc
-            9,  // reason date
-            8,  // user
-            16, // unit cost
-            11, // exact cost
-            7,  // one Day rate of sale
-            12, // DOI (# on hand / odros)
-            23  // branch
-
-        };
-        public static string[] supplyChainLossColNames = new string[]
+        public static List<string> sclColNames = new List<string>
         {
             "warehouseNum",
             "itemNum",
             "itemDesc",
             "qty",
-            "transactionType",
-            "reasonCode",
-            "reasonDesc",
-            "reasonDate",
-            "user",
+            "transCode",
+            "refCode",
+            "refDesc",
+            "sclDate",
+            "userID",
             "unitCost",
             "exactCost",
-            "oneDayRateOfSale",
+            "oneDay",
             "DOI",
+            "CE QTY",
             "branch"
         };
-
-        #endregion
+        public static List<string> branches = new List<string>
+        {
+            "Beach Cities",
+            "Boston",
+            "Canton",
+            "Denver",
+            "Eugene",
+            "Hawaii",
+            "Lima",
+            "Loveland",
+            "New Jersey",
+            "New York",
+            "Oakland",
+            "Oklahoma City",
+            "Portland",
+            "Renton",
+            "Riverside",
+            "San Diego",
+            "Sylmar",
+            "Tulsa"
+        };
 
         static void Main(string[] args)
         {
+
             CleanData cd = new CleanData();
             SQL sql = new SQL();
+            TimeSpan ttlRuntime = DateTime.Now.TimeOfDay;
+            TimeSpan dt = DateTime.Now.TimeOfDay;
 
-            #region CLEAN DATA
+            string copySrcPath =        @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Ranker Text Files\";
+            string superCleanDstPath =  @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\SU6 Rankers\SU6_clean.txt";
+            string sclCleanDstPath =    @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\S90 Rankers\S90_clean.txt";
+            string superProcessedPath = @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\SU6 Rankers\PROCESSED\";
+            string sclProcessedPath =   @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\S90 Rankers\PROCESSED\";
+            string superPendingPath =   @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\SU6 Rankers\PENDING\";
+            string sclPendingPath =     @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\WODKPI\WODKPI Data\S90 Rankers\PENDING\";
+            string volumePath =         @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Backend\Volume Database.accdb";
+            string refusalsPath =       @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Backend\Refusals Database.accdb";
+            string oosPath =            @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Backend\Out of Stock Database.accdb";
+            string sclPath =            @"\\stlabcfil002\abi_wod$\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Backend\Supply Chain Loss Database.accdb";
 
-            Console.WriteLine("BEGIN Copy Data  " + DateTime.Now);
-
-            string[] srcPaths =
-            {
-                @"N:\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Ranker Text Files\",
-                @"N:\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Imports\",
-                @"N:\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Softeon Reports\",
-                @"N:\WOD Public Shared\Operations Shared\01 - Management Pillar\5.0 Product and Process Indicators\Corporate KPI Database\Roadnet Reports Pulled by Omnitracs\"
-            };
-            string[] dstPaths =
-            {
-                @"C:\Users\y712969\Desktop\WODKPI Data\Ranker Text Files\",
-                @"C:\Users\y712969\Desktop\WODKPI Data\Imports\",
-                @"C:\Users\y712969\Desktop\WODKPI Data\Softeon Reports\",
-                @"C:\Users\y712969\Desktop\WODKPI Data\Roadnet Reports Pulled by Omnitracs"
-            };
-
-            for (int i = 0; i < srcPaths.Length; i++)
-            {
-                cd.ProcessDirectory(srcPaths[i], dstPaths[i]);
-            }
-
-            Console.WriteLine("END   Copy Data  " + DateTime.Now);
+            Console.WriteLine("BEGIN Copy Data - SU6 " + DateTime.Now);
+            cd.CopyFiles(copySrcPath + @"SU6\", superProcessedPath, superPendingPath);
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END Copy Data - SU6 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt);
             Console.WriteLine();
 
-            Console.WriteLine("BEGIN Clean Data " + DateTime.Now);
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN Copy Data - S90 " + DateTime.Now);
+            cd.CopyFiles(copySrcPath + @"S90\", sclProcessedPath, sclPendingPath);
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END Copy Data - S90 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt);
+            Console.WriteLine();
 
-            cd.InitClean("all");
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN Clean Data - SU6 " + DateTime.Now);
+            cd.CleanFiles(superPendingPath, superProcessedPath, superCleanDstPath, "SU6", lengths_SU6);
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END   Clean Data - SU6 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt);
+            Console.WriteLine();
 
-            Console.WriteLine("END   Clean Data " + DateTime.Now);
-            #endregion
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN Clean Data - S90 " + DateTime.Now);
+            cd.CleanFiles(sclPendingPath, sclProcessedPath, sclCleanDstPath, "S90", lengths_S90);
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END   Clean Data - S90 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt);
+            Console.WriteLine();
 
-            #region QUERIES
-
-            Console.WriteLine("BEGIN importing out of stocks " + DateTime.Now);
-            //sql.executeSQLScript(outOfStocksDropTables, outOfStocksConnStr);
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN SQL UPLOAD - SU6 " + DateTime.Now);
             sql.importRankerToTemp(
-                outOfStocksCreateTempFile,
-                outOfStocksCreateMiscTablesQueryPath,
-                outOfStocksDataSrc,
-                outOfStocksConnStr,
-                "TempOutOfStocks",
-                outOfStocksColWidths,
-                outOfStocksColNames,
-                outOfStocksDropTables
+                superCreateTempFile,
+                superInsertData,
+                "TempSU6",
+                superCleanDstPath,
+                connStr,
+                lengths_SU6,
+                superColNames
                 );
-            Console.WriteLine("END " + DateTime.Now);
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END SQL UPLOAD - SU6 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
 
-            Console.WriteLine("BEGIN importing supply chain loss " + DateTime.Now);
-            //sql.executeSQLScript(supplyChainLossDropTables, supplyChainLossConnStr);
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN SQL UPLOAD - S90 " + DateTime.Now);
             sql.importRankerToTemp(
-                supplyChainLossCreateTempFile,
-                supplyChainLossCreateMiscTablesQueryPath,
-                supplyChainLossDataSrc,
-                supplyChainLossConnStr,
-                "TempSupplyChainLoss",
-                supplyChainLossColWidths,
-                supplyChainLossColNames,
-                supplyChainLossDropTables);
-            Console.WriteLine("END " + DateTime.Now);
+                sclCreateTempFile,
+                sclInsertData,
+                "TempSCL",
+                sclCleanDstPath,
+                connStr,
+                lengths_S90,
+                sclColNames
+                );
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END SQL UPLOAD - S90 " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
 
-            Console.WriteLine("BEGIN importing volume " + DateTime.Now);
-            //sql.executeSQLScript(volumeDropTables, volumeConnStr);
-            sql.importRankerToTemp(
-                volumeCreateTempFile,
-                volumeCreateMiscTablesQueryPath,
-                volumeDataSrc,
-                volumeConnStr,
-                "TempVolume",
-                volumeColWidths,
-                volumeColNames,
-                volumeDropTables);
-            Console.WriteLine("END " + DateTime.Now);
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN WRITE TO ACCESS - VOLUMES " + DateTime.Now);
+            foreach (string branch in branches)
+            {
+                Console.WriteLine("Writing to Volumes - " + branch + "...");
+                sql.connectToAccess(volumePath, branch, delVolAccessPth);
+                sql.connectToAccess(volumePath, branch, insVolAccessPth);
+            }
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END WRITE TO ACCESS - VOLUMES " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
 
-            Console.WriteLine("BEGIN importing refusals " + DateTime.Now);
-            //sql.executeSQLScript(refusalsDropTables, refusalsConnStr);
-            sql.importRankerToTemp(
-                refusalsCreateTempFile,
-                refusalsCreateMiscTablesQueryPath,
-                refusalsDataSrc,
-                refusalsConnStr,
-                "TempRefusals",
-                refusalsColWidths,
-                refusalsColNames,
-                refusalsDropTables);
-            Console.WriteLine("END " + DateTime.Now);
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN WRITE TO ACCESS - REFUSALS " + DateTime.Now);
+            foreach (string branch in branches)
+            {
+                Console.WriteLine("Writing to Refusals - " + branch + "...");
+                sql.connectToAccess(refusalsPath, branch, delRefAccessPth);
+                sql.connectToAccess(refusalsPath, branch, insRefAccessPth);
+            }
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END WRITE TO ACCESS - REFUSALS " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
 
-            #endregion
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN WRITE TO ACCESS - OUT OF STOCKS " + DateTime.Now);
+            foreach (string branch in branches)
+            {
+                Console.WriteLine("Writing to Out of Stocks - " + branch + "...");
+                sql.connectToAccess(oosPath, branch, delOosAccessPth);
+                sql.connectToAccess(oosPath, branch, insOosAccessPth);
+            }
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END WRITE TO ACCESS - OUT OF STOCKS " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
 
-            Console.ReadKey();
+            dt = DateTime.Now.TimeOfDay;
+            Console.WriteLine("BEGIN WRITE TO ACCESS - SUPPLY CHAIN LOSS " + DateTime.Now);
+            foreach (string branch in branches)
+            {
+                Console.WriteLine("Writing to Supply Chain Loss - " + branch + "...");
+                sql.connectToAccess(sclPath, branch, delSclAccessPth);
+                sql.connectToAccess(sclPath, branch, insSclAccessPth);
+            }
+            dt = DateTime.Now.Subtract(dt).TimeOfDay;
+            Console.WriteLine("END WRITE TO ACCESS - SUPPLY CHAIN LOSS " + DateTime.Now);
+            Console.WriteLine("Runtime: " + dt.Minutes + ":" + dt.Seconds + ":" + dt.Milliseconds);
+            Console.WriteLine();
+
+            ExcelEngine.CombineWorkBooks(@"C:\Users\y712969\Desktop\test.xlsx", "", @"C:\Users\y712969\Desktop\Softeon Reports\OOS", false);
+
+
+            ttlRuntime = DateTime.Now.Subtract(ttlRuntime).TimeOfDay;
+            Console.WriteLine("TOTAL RUNTIME: " + ttlRuntime.Minutes + ":" + ttlRuntime.Seconds + ":" + ttlRuntime.Milliseconds);
+            //Console.ReadLine();
         }
     }
 }
